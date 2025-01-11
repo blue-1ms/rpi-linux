@@ -741,8 +741,6 @@
 					  IRQ_TYPE_LEVEL_LOW)>,
 			     <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(4) |
 					  IRQ_TYPE_LEVEL_LOW)>;
-		/* This only applies to the ARMv7 stub */
-		arm,cpu-registers-not-fw-configured;
 	};
 
 	cpus: cpus {
@@ -1210,7 +1208,7 @@
 			clocks = <&clk_emmc2>;
 			sdhci-caps-mask = <0x0000C000 0x0>;
 			sdhci-caps = <0x0 0x0>;
-			supports-cqe;
+			supports-cqe = <1>;
 			mmc-ddr-3_3v;
 			status = "disabled";
 		};
