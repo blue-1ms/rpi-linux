@@ -158,14 +158,6 @@
 		};
 	};
 	fragment@8 {
-		target = <&uart1>;
-		__overlay__ {
-			pinctrl-names = "default";
-			pinctrl-0 = <&uart1_pins>;
-			status = "okay";
-		};
-	};
-	fragment@9 {
 		target = <&rp1_gpio>; /* Updated for RP1 GPIO */
 		__overlay__ {
 			i2c1_pins: i2c1 {
@@ -180,21 +172,10 @@
 				brcm,pins = <4>;
 				brcm,function = <1>;
 			};
-			uart1_pins: uart1_pins {
-				brcm,pins = <14 15>;
-				brcm,function = <2>;
-				brcm,pull = <0 2>;
-			};
 		};
 	};
-	fragment@10 {
-		target-path = "/chosen";
-		__overlay__ {
-			bootargs = "8250.nr_uarts=1";
-		};
-	};
-	fragment@11 {
-		target = <&pcie0>;
+	fragment@9 {
+		target-path = "ethernet0";
 		__overlay__ {
 			status = "disabled";
 		};
