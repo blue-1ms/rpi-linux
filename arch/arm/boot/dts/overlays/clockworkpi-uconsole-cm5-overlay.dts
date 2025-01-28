@@ -64,18 +64,6 @@
 		};
 	};
 	fragment@1 {
-		target = <&i2c0if>;
-		__overlay__ {
-			compatible = "brcm,i2c-bcm2835";
-		};
-	};
-	fragment@2 {
-		target-path = "/aliases";
-		__overlay__ {
-			i2c0 = "/soc/i2c@7e805000";
-		};
-	};
-	fragment@3 {
 		target-path = "/";
 		__overlay__  {
 			battery: battery@0 {
@@ -90,7 +78,7 @@
 			};
 		};
 	};
-	fragment@4 {
+	fragment@2 {
 		target = <&dsi1>;
 		__overlay__ {
 			#address-cells = <1>;
@@ -115,7 +103,7 @@
 			};
 		};
 	};
-	fragment@5 {
+	fragment@3 {
 		target-path = "/";
 		__overlay__ {
 			ocp8178_backlight: backlight@0 {
@@ -125,56 +113,7 @@
 			};
 		};
 	};
-	fragment@6 {
-		target = <&i2c1>;
-		__overlay__ {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			pinctrl-names = "default";
-			pinctrl-0 = <&i2c1_pins>;
-			status = "okay";
-			adc101c: adc@54 {
-				reg = <0x54>;
-				compatible = "ti,adc101c";
-				status = "okay";
-			};
-		};
-	};
-	fragment@7 {
-		target = <&spi4>;
-		__overlay__ {
-			pinctrl-names = "default";
-			pinctrl-0 = <&spi4_pins &spi4_cs_pins>;
-			cs-gpios = <&rp1_gpio 4 1>; /* Updated for RP1 GPIO */
-			status = "okay";
-			spidev4_0: spidev@0 {
-				compatible = "spidev";
-				reg = <0>; /* CE0 */
-				#address-cells = <1>;
-				#size-cells = <0>;
-				spi-max-frequency = <125000000>;
-				status = "okay";
-			};
-		};
-	};
-	fragment@8 {
-		target = <&rp1_gpio>; /* Updated for RP1 GPIO */
-		__overlay__ {
-			i2c1_pins: i2c1 {
-				brcm,pins = <44 45>;
-				brcm,function = <6>;
-			};
-			spi4_pins: spi4_pins {
-				brcm,pins = <6 7>;
-				brcm,function = <7>;
-			};
-			spi4_cs_pins: spi0_cs_pins {
-				brcm,pins = <4>;
-				brcm,function = <1>;
-			};
-		};
-	};
-	fragment@9 {
+	fragment@4 {
 		target-path = "ethernet0";
 		__overlay__ {
 			status = "disabled";
