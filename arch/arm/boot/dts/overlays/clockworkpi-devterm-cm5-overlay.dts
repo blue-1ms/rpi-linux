@@ -89,8 +89,8 @@
 					remote-endpoint = <&panel_dsi_port>;
 				};
 			};
-			panel_cwu50_cm5: panel@0 {
-				compatible = "cw,cwu50-cm5";
+			panel_cwd686: panel@0 {
+				compatible = "cw,cwd686";
 				reg = <0>;
 				reset-gpio = <&rp1_gpio 8 1>;
 				backlight = <&ocp8178_backlight>;
