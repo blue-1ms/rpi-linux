@@ -201,6 +201,7 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
 	mlx90640.dtbo \
 	mmc.dtbo \
 	mz61581.dtbo \
+	nospi10.dtbo \
 	ov2311.dtbo \
 	ov5647.dtbo \
 	ov64a40.dtbo \
@@ -343,6 +344,7 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
 	vc4-kms-dpi-panel.dtbo \
 	vc4-kms-dsi-7inch.dtbo \
 	vc4-kms-dsi-generic.dtbo \
+	vc4-kms-dsi-ili79600-10-1inch.dtbo \
 	vc4-kms-dsi-ili9881-5inch.dtbo \
 	vc4-kms-dsi-ili9881-7inch.dtbo \
 	vc4-kms-dsi-lt070me05000.dtbo \
