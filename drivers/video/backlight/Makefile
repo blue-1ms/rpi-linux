@@ -62,4 +62,3 @@ obj-$(CONFIG_BACKLIGHT_ARCXCNN) 	+= arcxcnn_bl.o
 obj-$(CONFIG_BACKLIGHT_RAVE_SP)		+= rave-sp-backlight.o
 obj-$(CONFIG_BACKLIGHT_LED)		+= led_bl.o
 obj-$(CONFIG_BACKLIGHT_OCP8178)		+= ocp8178_bl.o
-obj-$(CONFIG_BACKLIGHT_OCP8178)		+= ocp8178_bl.o
