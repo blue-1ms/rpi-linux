@@ -419,7 +419,7 @@ static int axp20x_battery_get_prop(struct power_supply *psy,
 						 &val->intval, 1000);
 		if (ret)
 			return ret;
-		axp20x_batt->current_now = val->intval;
+		axp20x_batt->voltage_now = val->intval;
 
 		break;
 
