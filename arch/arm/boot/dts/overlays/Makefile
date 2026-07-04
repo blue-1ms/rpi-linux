@@ -46,6 +46,8 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
 	clockworkpi-devterm-cm5.dtbo \
 	clockworkpi-devterm.dtbo \
 	clockworkpi-uconsole-cm3.dtbo \
+	clockworkpi-uconsole-cm4.dtbo \
+	clockworkpi-uconsole-cm4s.dtbo \
 	clockworkpi-uconsole-cm5.dtbo \
 	clockworkpi-uconsole.dtbo \
 	cm-swap-i2c0.dtbo \
