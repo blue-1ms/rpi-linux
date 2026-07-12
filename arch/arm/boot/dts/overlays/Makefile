@@ -373,7 +373,16 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
 	wifimac.dtbo \
 	wittypi.dtbo \
 	wm8960-soundcard.dtbo \
-	ws2812-pio.dtbo
+	ws2812-pio.dtbo \
+	clockworkpi-custom-battery.dtbo \
+	clockworkpi-devterm-cm4.dtbo \
+	clockworkpi-devterm-cm5.dtbo \
+	clockworkpi-devterm.dtbo \
+	clockworkpi-uconsole-cm3.dtbo \
+	clockworkpi-uconsole-cm4.dtbo \
+	clockworkpi-uconsole-cm4s.dtbo \
+	clockworkpi-uconsole-cm5.dtbo \
+	clockworkpi-uconsole.dtbo 
 
 targets += dtbs dtbs_install
 targets += $(dtbo-y)
