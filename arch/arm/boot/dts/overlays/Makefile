@@ -43,6 +43,8 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
 	chipdip-dac.dtbo \
 	cirrus-wm5102.dtbo \
 	cm-swap-i2c0.dtbo \
+	clockworkpi-custom-battery.dtbo \
+	clockworkpi-uconsole-cm4.dtbo \
 	cma.dtbo \
 	crystalfontz-cfa050_pi_m.dtbo \
 	cutiepi-panel.dtbo \
