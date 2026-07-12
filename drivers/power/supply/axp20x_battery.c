@@ -118,6 +118,9 @@ struct axp20x_batt_ps {
 	struct iio_channel *batt_v;
 	/* Maximum constant charge current */
 	unsigned int max_ccc;
+	int energy_full_design;
+	int current_now;
+	int voltage_now;
 	const struct axp_data	*data;
 	bool ts_disable;
 };
@@ -368,6 +371,7 @@ static int axp20x_battery_get_prop(struct power_supply *psy,
 		}
 		if (ret)
 			return ret;
+		axp20x_batt->current_now = val->intval;
 
 		break;
 
@@ -415,8 +419,54 @@ static int axp20x_battery_get_prop(struct power_supply *psy,
 						 &val->intval, 1000);
 		if (ret)
 			return ret;
+		axp20x_batt->current_now = val->intval;
 
 		break;
+
+	case POWER_SUPPLY_PROP_ENERGY_FULL:
+	case POWER_SUPPLY_PROP_ENERGY_NOW:
+	case POWER_SUPPLY_PROP_ENERGY_FULL_DESIGN:
+		ret = regmap_read(axp20x_batt->regmap, AXP20X_PWR_OP_MODE,
+				  &reg);
+		if (ret)
+			return ret;
+		if (!(reg & AXP20X_PWR_OP_BATT_PRESENT)) {
+			val->intval = 0;
+			break;
+		}
+		if (axp20x_batt->energy_full_design <= 0)
+			return -ENODATA;
+		if (psp != POWER_SUPPLY_PROP_ENERGY_NOW) {
+			val->intval = axp20x_batt->energy_full_design;
+			break;
+		}
+		ret = regmap_read(axp20x_batt->regmap, AXP20X_FG_RES, &reg);
+		if (ret)
+			return ret;
+		if (axp20x_batt->data->has_fg_valid &&
+		    !(reg & AXP22X_FG_VALID))
+			return -EINVAL;
+		val1 = min_t(int, reg & AXP209_FG_PERCENT, 100);
+		val->intval = div_s64((s64)val1 *
+				      axp20x_batt->energy_full_design, 100);
+		break;
+
+	case POWER_SUPPLY_PROP_POWER_NOW: {
+		union power_supply_propval current;
+		union power_supply_propval voltage;
+
+		ret = axp20x_battery_get_prop(psy,
+				POWER_SUPPLY_PROP_CURRENT_NOW, &current);
+		if (ret)
+			return ret;
+		ret = axp20x_battery_get_prop(psy,
+				POWER_SUPPLY_PROP_VOLTAGE_NOW, &voltage);
+		if (ret)
+			return ret;
+		val->intval = div_s64((s64)voltage.intval * current.intval,
+				      1000000);
+		break;
+	}
 
 	default:
 		return -EINVAL;
@@ -850,6 +900,10 @@ static enum power_supply_property axp20x_battery_props[] = {
 	POWER_SUPPLY_PROP_VOLTAGE_MAX,
 	POWER_SUPPLY_PROP_VOLTAGE_MIN,
 	POWER_SUPPLY_PROP_CAPACITY,
+	POWER_SUPPLY_PROP_ENERGY_FULL,
+	POWER_SUPPLY_PROP_ENERGY_NOW,
+	POWER_SUPPLY_PROP_ENERGY_FULL_DESIGN,
+	POWER_SUPPLY_PROP_POWER_NOW,
 };
 
 static enum power_supply_property axp717_battery_props[] = {
@@ -1089,6 +1143,30 @@ static const struct of_device_id axp20x_battery_ps_id[] = {
 };
 MODULE_DEVICE_TABLE(of, axp20x_battery_ps_id);
 
+static int axp20x_apply_uconsole_setup(struct axp20x_batt_ps *axp20x_batt)
+{
+	int ret;
+
+	ret = regmap_update_bits(axp20x_batt->regmap,
+				 AXP20X_VBUS_IPSOUT_MGMT, 0x03, 0x03);
+	if (ret)
+		return ret;
+	ret = regmap_update_bits(axp20x_batt->regmap,
+				 AXP20X_OFF_CTRL, 0x08, 0x08);
+	if (ret)
+		return ret;
+	ret = regmap_update_bits(axp20x_batt->regmap,
+				 AXP20X_CHRG_CTRL2, 0x30, 0x20);
+	if (ret)
+		return ret;
+	ret = regmap_update_bits(axp20x_batt->regmap,
+				 AXP20X_PEK_KEY, 0x0f, 0x0b);
+	if (ret)
+		return ret;
+	return regmap_update_bits(axp20x_batt->regmap,
+				  AXP20X_GPIO0_CTRL, 0x07, 0x00);
+}
+
 static int axp20x_power_probe(struct platform_device *pdev)
 {
 	struct axp20x_batt_ps *axp20x_batt;
@@ -1130,6 +1208,9 @@ static int axp20x_power_probe(struct platform_device *pdev)
 
 	if (!power_supply_get_battery_info(axp20x_batt->batt, &info)) {
 		axp20x_batt->data->set_bat_info(pdev, axp20x_batt, info);
+		if (info->energy_full_design_uwh > 0)
+			axp20x_batt->energy_full_design =
+				info->energy_full_design_uwh;
 		power_supply_put_battery_info(axp20x_batt->batt, info);
 	}
 
@@ -1138,6 +1219,14 @@ static int axp20x_power_probe(struct platform_device *pdev)
 	 * to current register value by default.
 	 */
 	axp20x_get_constant_charge_current(axp20x_batt, &axp20x_batt->max_ccc);
+
+	if (device_property_read_bool(dev,
+				      "clockworkpi,uconsole-pmic-setup")) {
+		ret = axp20x_apply_uconsole_setup(axp20x_batt);
+		if (ret)
+			return dev_err_probe(dev, ret,
+					     "failed to configure uConsole PMIC\n");
+	}
 
 	return 0;
 }
