@@ -521,6 +521,12 @@ config BACKLIGHT_LED
 	  If you have a LCD backlight adjustable by LED class driver, say Y
 	  to enable this driver.
 
+config BACKLIGHT_OCP8178
+	tristate "OCP8178 backlight driver"
+	depends on GPIOLIB
+	help
+	  Say Y here to enable the ClockworkPi uConsole OCP8178 backlight.
+
 endif # BACKLIGHT_CLASS_DEVICE
 
 endmenu
