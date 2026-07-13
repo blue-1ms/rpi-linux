@@ -452,18 +452,19 @@ static int axp20x_battery_get_prop(struct power_supply *psy,
 		break;
 
 	case POWER_SUPPLY_PROP_POWER_NOW: {
-		union power_supply_propval current;
-		union power_supply_propval voltage;
+		union power_supply_propval current_prop;
+		union power_supply_propval voltage_prop;
 
 		ret = axp20x_battery_get_prop(psy,
-				POWER_SUPPLY_PROP_CURRENT_NOW, &current);
+				POWER_SUPPLY_PROP_CURRENT_NOW, &current_prop);
 		if (ret)
 			return ret;
 		ret = axp20x_battery_get_prop(psy,
-				POWER_SUPPLY_PROP_VOLTAGE_NOW, &voltage);
+				POWER_SUPPLY_PROP_VOLTAGE_NOW, &voltage_prop);
 		if (ret)
 			return ret;
-		val->intval = div_s64((s64)voltage.intval * current.intval,
+		val->intval = div_s64((s64)voltage_prop.intval *
+				      current_prop.intval,
 				      1000000);
 		break;
 	}
