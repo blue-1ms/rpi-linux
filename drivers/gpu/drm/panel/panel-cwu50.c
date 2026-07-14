@@ -584,7 +584,7 @@ static int cwu50_prepare(struct drm_panel *panel)
 	struct cwu50 *ctx = panel_to_cwu50(panel);
 	struct mipi_dsi_device *dsi = to_mipi_dsi_device(ctx->dev);
 	int ret;
-	u8 buf[4];
+	u8 buf[4] = { 0 };
 
 	if (ctx->prepared)
 		return 0;
@@ -635,9 +635,17 @@ static int cwu50_prepare(struct drm_panel *panel)
 	dcs_write_seq(0x11);// SLPOUT
         msleep(120);
         dcs_write_seq(0xE0,0x00);
-        mipi_dsi_dcs_read(dsi, 0x04, buf, 3);
+        ret = mipi_dsi_dcs_read(dsi, 0x04, buf, 3);
 	
-        if(buf[0] == 0x39) ctx->is_new_panel = 1;
+	if (ret < 0) {
+		dev_warn(ctx->dev, "failed to read panel ID (%d); using GPIO detection\n", ret);
+	} else if (ret < 1) {
+		dev_warn(ctx->dev, "panel ID read returned no data; using GPIO detection\n");
+	} else if (buf[0] == 0x39 && !ctx->is_new_panel) {
+		ctx->is_new_panel = true;
+		dev_info(ctx->dev,
+			 "Detected new panel type from DCS ID 0x%02x\n", buf[0]);
+	}
 
 	if (ctx->is_new_panel)
 		cwu50_init_sequence2(ctx);
