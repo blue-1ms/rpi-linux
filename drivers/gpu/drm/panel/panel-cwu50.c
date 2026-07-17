@@ -653,7 +653,7 @@ static int cwu50_prepare_cm3(struct cwu50 *ctx)
 {
 	struct mipi_dsi_device *dsi = to_mipi_dsi_device(ctx->dev);
 	int ret;
-	u8 buf[4];
+	u8 buf[4] = { 0 };
 	u8 response;
 
 	gpiod_set_value_cansleep(ctx->id_gpio, 1); /* ensure asserted state */
@@ -692,9 +692,17 @@ static int cwu50_prepare_cm3(struct cwu50 *ctx)
 	dcs_write_seq(0x11); /* SLPOUT */
 	msleep(120);
 	dcs_write_seq(0xE0, 0x00);
-	mipi_dsi_dcs_read(dsi, 0x04, buf, 3);
-	if (buf[0] == 0x39)
+	ret = mipi_dsi_dcs_read(dsi, 0x04, buf, 3);
+	if (ret < 0) {
+		dev_warn(ctx->dev, "failed to read panel ID (%d); using GPIO detection\n",
+			 ret);
+	} else if (ret < 1) {
+		dev_warn(ctx->dev, "panel ID read returned no data; using GPIO detection\n");
+	} else if (buf[0] == 0x39 && !ctx->is_new_panel) {
 		ctx->is_new_panel = true;
+		dev_info(ctx->dev, "Detected new panel type from DCS ID 0x%02x\n",
+			 buf[0]);
+	}
 
 	if (ctx->is_new_panel)
 		cwu50_init_sequence2(ctx);
@@ -754,7 +762,7 @@ static int cwu50_prepare_cm45(struct cwu50 *ctx)
 {
 	struct mipi_dsi_device *dsi = to_mipi_dsi_device(ctx->dev);
 	int ret;
-	u8 buf[4];
+	u8 buf[4] = { 0 };
 
 	if (ctx->iovcc != NULL && ctx->vci != NULL) {
 		dev_info(ctx->dev, "regulator iovcc and vci defined, enabling\n");
@@ -797,10 +805,17 @@ static int cwu50_prepare_cm45(struct cwu50 *ctx)
 	dcs_write_seq(0x11); // SLPOUT
 	msleep(120);
 	dcs_write_seq(0xE0, 0x00);
-	mipi_dsi_dcs_read(dsi, 0x04, buf, 3);
-
-	if (buf[0] == 0x39)
-		ctx->is_new_panel = 1;
+	ret = mipi_dsi_dcs_read(dsi, 0x04, buf, 3);
+	if (ret < 0) {
+		dev_warn(ctx->dev, "failed to read panel ID (%d); using GPIO detection\n",
+			 ret);
+	} else if (ret < 1) {
+		dev_warn(ctx->dev, "panel ID read returned no data; using GPIO detection\n");
+	} else if (buf[0] == 0x39 && !ctx->is_new_panel) {
+		ctx->is_new_panel = true;
+		dev_info(ctx->dev, "Detected new panel type from DCS ID 0x%02x\n",
+			 buf[0]);
+	}
 
 	if (ctx->is_new_panel)
 		cwu50_init_sequence2(ctx);
