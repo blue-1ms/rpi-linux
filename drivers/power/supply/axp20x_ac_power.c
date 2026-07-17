@@ -13,6 +13,7 @@
 #include <linux/mfd/axp20x.h>
 #include <linux/module.h>
 #include <linux/of.h>
+#include <linux/property.h>
 #include <linux/platform_device.h>
 #include <linux/pm.h>
 #include <linux/power_supply.h>
@@ -44,6 +45,7 @@ struct axp20x_ac_power {
 	struct iio_channel *acin_v;
 	struct iio_channel *acin_i;
 	bool has_acin_path_sel;
+	bool uconsole_vbus_reset;
 	unsigned int num_irqs;
 	unsigned int irqs[] __counted_by(num_irqs);
 };
@@ -51,9 +53,20 @@ struct axp20x_ac_power {
 static irqreturn_t axp20x_ac_power_irq(int irq, void *devid)
 {
 	struct axp20x_ac_power *power = devid;
+	int ret;
 
-	regmap_update_bits(power->regmap, AXP20X_VBUS_IPSOUT_MGMT, 0x03, 0x00);
-	regmap_update_bits(power->regmap, AXP20X_VBUS_IPSOUT_MGMT, 0x03, 0x03);
+	if (power->uconsole_vbus_reset) {
+		ret = regmap_update_bits(power->regmap,
+					 AXP20X_VBUS_IPSOUT_MGMT, 0x03, 0x00);
+		if (!ret)
+			ret = regmap_update_bits(power->regmap,
+						 AXP20X_VBUS_IPSOUT_MGMT,
+						 0x03, 0x03);
+		if (ret)
+			dev_err_ratelimited(&power->supply->dev,
+					    "uConsole VBUS reset failed: %d\n",
+					    ret);
+	}
 
 	power_supply_changed(power->supply);
 
@@ -363,6 +376,8 @@ static int axp20x_ac_power_probe(struct platform_device *pdev)
 
 	power->regmap = dev_get_regmap(pdev->dev.parent, NULL);
 	power->has_acin_path_sel = axp_data->acin_path_sel;
+	power->uconsole_vbus_reset = device_property_read_bool(
+		&pdev->dev, "clockworkpi,uconsole-vbus-reset-on-irq");
 	power->num_irqs = axp_data->num_irq_names;
 
 	platform_set_drvdata(pdev, power);

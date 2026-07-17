@@ -153,10 +153,12 @@
 				battery_power_supply: battery-power-supply {
 					compatible = "x-powers,axp221-battery-power-supply";
 					monitored-battery = <&battery>;
+					clockworkpi,uconsole-pmic-setup;
 				};
 
 				ac_power_supply: ac_power_supply {
 					compatible = "x-powers,axp221-ac-power-supply";
+					clockworkpi,uconsole-vbus-reset-on-irq;
 				};
 
 			};
