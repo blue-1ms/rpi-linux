@@ -16,6 +16,8 @@
  */
 
 #include <linux/dma-buf.h>
+#include <linux/of.h>
+#include <linux/pagemap.h>
 #include <linux/vmalloc.h>
 
 #include <drm/drm_print.h>
@@ -151,11 +153,30 @@ struct v3d_bo *v3d_bo_create(struct drm_device *dev, struct drm_file *file_priv,
 {
 	struct drm_gem_shmem_object *shmem_obj;
 	struct v3d_bo *bo;
+	gfp_t mask;
 	int ret;
 
 	shmem_obj = drm_gem_shmem_create(dev, unaligned_size);
 	if (IS_ERR(shmem_obj))
 		return ERR_CAST(shmem_obj);
+
+	/*
+	 * BCM2711 V3D can render from memory that its VC4 display pipeline
+	 * cannot address directly.  PRIME mappings preserve the V3D SG
+	 * layout, whose segments may exceed SWIOTLB's maximum mapping size.
+	 * Keep native V3D BOs in the 30-bit DMA zone so both devices can
+	 * address the same pages without bouncing.
+	 *
+	 * Set the mapping constraint before drm_gem_shmem_get_pages_sgt()
+	 * allocates and pins any backing pages.
+	 */
+	if (of_device_is_compatible(dev->dev->of_node, "brcm,2711-v3d")) {
+		mask = mapping_gfp_mask(shmem_obj->base.filp->f_mapping);
+		mask &= ~(__GFP_DMA32 | __GFP_HIGHMEM);
+		mask |= __GFP_DMA;
+		mapping_set_gfp_mask(shmem_obj->base.filp->f_mapping, mask);
+	}
+
 	bo = to_v3d_bo(&shmem_obj->base);
 	bo->vaddr = NULL;
 
