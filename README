@@ -42,7 +42,8 @@ new releases.
 
 For a new upstream kernel:
 
-1. start from an exact Canonical Ubuntu `linux-raspi` source commit;
+1. prefer an exact Canonical Ubuntu `linux-raspi` source commit when Canonical provides the
+   target upstream version; otherwise start from an exact official Raspberry Pi kernel commit;
 2. rebase and review the uConsole patch series maintained by `uconsole-ubuntu-lts`;
 3. compare against the pinned AK-Rex snapshot only for provenance or newly discovered hardware
    fixes;
