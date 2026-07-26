@@ -38,6 +38,18 @@ Branch and release policy
 - Kernel packages, A/B validation, FAT diagnostics, hardware evidence and
   update instructions live in
   [`uconsole-ubuntu-lts`](https://github.com/blue-1ms/uconsole-ubuntu-lts/blob/main/HANDOFF.md).
+- Kernel and platform packages are one stable release transaction. The source
+  tag remains kernel-only, while the matching APT Release contains the split
+  image/modules/headers/buildinfo/meta packages, exact tested platform and
+  applicable Plymouth package. A second platform Release is used only for a
+  platform-only change with unchanged kernel source and package bytes.
+- Package validation is content-addressed and signed. Reusing identical kernel
+  package bytes reuses that receipt; it does not repeat modules, depmod,
+  vermagic, headers, DT or initramfs checks. Hardware A/B and CM4 validation is
+  a separate stable gate.
+
+The durable rules, validation scopes and forbidden release-specific constants
+are documented in [UCONSOLE_RELEASE_POLICY.md](UCONSOLE_RELEASE_POLICY.md).
 
 The next upstream kernel must use a new ABI, Debian package version, candidate
 tag and immutable receipt. Do not install this repository directly over
