@@ -47,6 +47,9 @@ Branch and release policy
   package bytes reuses that receipt; it does not repeat modules, depmod,
   vermagic, headers, DT or initramfs checks. Hardware A/B and CM4 validation is
   a separate stable gate.
+- The adjacent N-1 kernel rule applies to a kernel rollout. Ordinary Ubuntu,
+  firmware, initramfs or platform boot-asset updates use the complete previous
+  deployment as fallback and may keep the same kernel ABI in both slots.
 
 The durable rules, validation scopes and forbidden release-specific constants
 are documented in [UCONSOLE_RELEASE_POLICY.md](UCONSOLE_RELEASE_POLICY.md).

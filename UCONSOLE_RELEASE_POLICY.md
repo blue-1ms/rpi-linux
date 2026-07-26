@@ -12,7 +12,10 @@ archived manifest path. Those values come from the selected manifest, immutable
 package/release receipts, dpkg metadata, A/B deployment state or explicit
 evidence paths. Code retains only stable rules such as the `*-uconsole` flavour,
 ABI/asset consistency, minimum platform compatibility, signatures and current
-plus one adjacent N-1 fallback.
+plus one release-typed fallback. A kernel rollout uses the adjacent
+hardware-passed N-1 kernel. An ordinary system, firmware, initramfs or platform
+boot-asset update uses the previous known-good deployment, which may have the
+same kernel ABI as the candidate.
 
 ## Validation layers
 
@@ -23,10 +26,13 @@ build, DTB/DTBO and staging initramfs. A later candidate with identical package
 bytes reuses that receipt after signature and SHA verification.
 
 The hardware stable gate separately covers `piboot-try`, promote, FAT mailbox,
-panel/backlight/DRM, input/audio/PMIC, Wi-Fi/BT/basic USB and the sole adjacent
-N-1 fallback. Kernel-only releases do not perform image compose, mounted-image,
-GNOME or first-boot validation. README, GitHub Release, tag, retention and final
-publication checks run only during stable closeout.
+panel/backlight/DRM, input/audio/PMIC, Wi-Fi/BT/basic USB and the release-typed
+fallback. Kernel releases require the sole adjacent N-1 kernel. Ordinary
+boot-asset updates require the pre-update deployment and do not fail merely
+because both deployments use the same ABI. Kernel-only releases do not perform
+image compose, mounted-image, GNOME or first-boot validation. README, GitHub
+Release, tag, retention and final publication checks run only during stable
+closeout.
 
 ## Kernel/platform transaction
 
